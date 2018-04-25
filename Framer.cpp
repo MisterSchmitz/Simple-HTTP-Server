@@ -1,10 +1,10 @@
 #include <assert.h>
 #include <string.h>
-#include "CalcFramer.hpp"
+#include "Framer.hpp"
 
 using namespace std;
 
-void CalcFramer::append(string chars)
+void Framer::append(string chars)
 {	
 	int recv_count = chars.length();
 	// printf("%d bytes passed to? framer\n", recv_count);
@@ -69,22 +69,22 @@ void CalcFramer::append(string chars)
 	}
 }
 
-bool CalcFramer::hasMessage() const
+bool Framer::hasMessage() const
 {
 	return !(messages.empty());
 }
 
-string CalcFramer::topMessage() const
+string Framer::topMessage() const
 {
 	return messages.front();
 }
 
-void CalcFramer::popMessage()
+void Framer::popMessage()
 {
 	messages.pop();
 }
 
-// void CalcFramer::printToStream(ostream& stream) const
+// void Framer::printToStream(ostream& stream) const
 // {
 	// // PUT YOUR CODE HERE
 // }

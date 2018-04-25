@@ -2,7 +2,7 @@
 CC=g++
 CFLAGS=-ggdb -std=c++11 -Wall -Wextra -pedantic -Werror
 DEPS = httpd.h
-SRCS = httpd.cpp DieWithError.c HandleTCPClient.c CalcFramer.cpp CalcParser.cpp
+SRCS = httpd.cpp DieWithError.c HandleTCPClient.c Framer.cpp Parser.cpp
 MAIN_SRCS = main.c $(SRCS)
 MAIN_OBJS = $(MAIN_SRCS:.c=.o)
 

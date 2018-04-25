@@ -1,12 +1,12 @@
-#ifndef CALCFRAMER_HPP
-#define CALCFRAMER_HPP
+#ifndef Framer_HPP
+#define Framer_HPP
 
 #include <iostream>
 #include <unistd.h>
 #include <vector>
 #include <queue>
 
-class CalcFramer {
+class Framer {
 public:
 	// int GetNextMessage(int in, char *buf, size_t bufSize);
 
@@ -32,4 +32,4 @@ protected:
 	int msg_count=0;
 };
 
-#endif // CALCFRAMER_HPP
+#endif // Framer_HPP

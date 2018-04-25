@@ -24,7 +24,6 @@ void start_httpd(unsigned short port, string doc_root)
     /* Create socket for incoming connections */
     if ((servSock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
         DieWithError("socket() failed");
-	// printf("socket created\n");
       
     /* Construct local address structure */
     memset(&echoServAddr, 0, sizeof(echoServAddr));   /* Zero out structure */
@@ -53,7 +52,6 @@ void start_httpd(unsigned short port, string doc_root)
             DieWithError("accept() failed");
 
         /* clntSock is connected to a client! */
-
         printf("Handling client %s\n", inet_ntoa(echoClntAddr.sin_addr));
 
         HandleTCPClient(clntSock);

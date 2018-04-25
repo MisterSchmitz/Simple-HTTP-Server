@@ -6,19 +6,17 @@
 #include <iostream>
 #include <assert.h>
 #include "httpd.h"
-#include "CalcFramer.hpp"
-#include "CalcParser.hpp"
+#include "Framer.hpp"
+#include "Parser.hpp"
 
 using namespace std;
 
-uint64_t accumulator=0;
-
-int CalcExecute(uint64_t &acc, CalcInstruction ins);
+int CalcExecute(HTTPRequest req);
 
 void HandleTCPClient(int clntSocket)
 {
-	CalcFramer f;
-	CalcParser p;
+	Framer f;
+	Parser p;
 	
 	char recv_buffer[1024];
 	
@@ -44,15 +42,15 @@ void HandleTCPClient(int clntSocket)
 		while (f.hasMessage()) {
 			string m = f.topMessage();
 			f.popMessage();
-			CalcInstruction ins = p.parse(m);
-			if(CalcExecute(accumulator, ins)) {
-				// Send result to client
-				string calc_result = to_string(accumulator).append("\r\n");
-				int send_count = send(clntSocket, calc_result.c_str(), calc_result.length(), 0);
-				if (send_count < 0) {
-					DieWithError("Send result to client failed.\n");
-				}
-				accumulator = 0; // Reset accumulator
+			HTTPRequest req = p.parse(m);
+			string request = req.response_code+" "+req.method+" "+req.path+" "+req.HTTPversion;
+			// Send result to client
+			string result = request.append("\r\n");
+			// cout << result;
+			cout << req.response_code+"\n"+req.method+"\n"+req.path+"\n"+req.HTTPversion+"\n";
+			int send_count = send(clntSocket, result.c_str(), result.length(), 0);
+			if (send_count < 0) {
+				DieWithError("Send result to client failed.\n");
 			}
 		}
 	}
@@ -60,18 +58,18 @@ void HandleTCPClient(int clntSocket)
     close(clntSocket);    /* Close client socket */
 }
 
-int CalcExecute(uint64_t &acc, CalcInstruction ins) {
-	if (ins.operation == "END") {
+int CalcExecute(HTTPRequest req) {
+	if (req.method == "END") {
 		return 1;
 	}
-	else if (ins.operation == "SET") {
-		acc = ins.value;
-	}
-	else if (ins.operation == "ADD") {
-		acc += ins.value;
-	}
-	else if (ins.operation == "SUB") {
-		acc -= ins.value;
-	}
+	// else if (req.method == "SET") {
+		// acc = req.value;
+	// }
+	// else if (req.method == "ADD") {
+		// acc += req.value;
+	// }
+	// else if (req.method == "SUB") {
+		// acc -= req.value;
+	// }
 	return 0;
 }
