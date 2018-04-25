@@ -7,36 +7,40 @@
 
 using namespace std;
 
-// typedef struct HTTPRequestFirstLine_t {
-	
-// } HTTPRequestFirstLine;
-
-// typedef struct HTTPRequestHeader_t {
-	
-// } HTTPRequestHeader;
-
-class HTTPRequest {
-public:
-	// HTTPRequestFirstLine_t HTTPRequestFirstLine;
+struct HTTPRequestFirstLine_t {
 	int status_code;
 	string method;
 	string path;
 	string HTTPversion;
+} ;
+
+// struct HTTPRequestHeader_t {
+	
+// } ;
+
+class HTTPRequest {
+public:
+	HTTPRequestFirstLine_t first_line;
+	// HTTPRequestHeader_t header;
 };
 
-typedef struct HTTPResponseFirstLine_t {
+// typedef struct HTTPResponseFirstLine_t {
 	
-} HTTPResponseFirstLine;
+// } HTTPResponseFirstLine;
 
-typedef struct HTTPResponseHeader_t {
+// typedef struct HTTPResponseHeader_t {
 	
-} HTTPResponseHeader;
+// } HTTPResponseHeader;
 
-class HTTPResponse {
-public:
+struct HTTPResponseFirstLine_t {
 	string HTTPVersion;
 	int status_code;
 	string status_code_description;
+} ;
+
+class HTTPResponse {
+public:
+	HTTPResponseFirstLine_t first_line;
 };
 
 class Parser {

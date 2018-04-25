@@ -3,14 +3,14 @@
 #include <string>
 #include "Parser.hpp"
 
-HTTPRequest Parser::parse(std::string request)
-{
+HTTPRequest Parser::parse(std::string request){
 	HTTPRequest req;
+	// req.first_line.first_line.status_code = -1
 	
-	req.status_code = -1;
-	req.method = "";
-	req.path = "";
-	req.HTTPversion = "";
+	req.first_line.status_code = -1;
+	req.first_line.method = "";
+	req.first_line.path = "";
+	req.first_line.HTTPversion = "";
 	
 	char method_delim = ' ';
 	char path_delim = ' ';
@@ -21,63 +21,62 @@ HTTPRequest Parser::parse(std::string request)
 	int method_delim_idx = request.find(method_delim, pos);
 	
 	if (method_delim_idx==-1) {
-		req.method = "END";
+		req.first_line.method = "END";
 		return req;
 	}
 
-	req.method = request.substr(pos, method_delim_idx);
+	req.first_line.method = request.substr(pos, method_delim_idx);
 	pos = method_delim_idx+1;
 	
-	if (req.method != "GET") {
-		req.status_code = 400;	 // We only support GET
+	if (req.first_line.method != "GET") {
+		req.first_line.status_code = 400;	 // We only support GET
 		return req;
 	}
 	
 	// Find path delimiter
 	int path_delim_idx = request.find(path_delim, pos);
 	string path = request.substr(pos, path_delim_idx-pos);
-	req.path = path;
+	req.first_line.path = path;
 	pos = path_delim_idx+1;
 	
 	// Find HTTPversion delimiter
 	int version_delim_idx = request.find(version_delim, pos);
 	string HTTPversion = request.substr(pos, version_delim_idx-pos);
-	req.HTTPversion = HTTPversion;
+	req.first_line.HTTPversion = HTTPversion;
 	
 	
 	// Valid request, set status_code
-	req.status_code = 200;
+	req.first_line.status_code = 200;
 	
 	return req;
 }
 
-HTTPResponse Parser::respond(HTTPRequest request)
-{
+HTTPResponse Parser::respond(HTTPRequest request) {
 	HTTPResponse resp;
 	
-	resp.HTTPVersion = "";
-	resp.status_code = -1;
-	resp.status_code_description = "";
+	resp.first_line.HTTPVersion = "";
+	resp.first_line.status_code = -1;
+	resp.first_line.status_code_description = "";
 	
 	// TODO: Pull supported HTTPVersion from Server
-	resp.HTTPVersion = "HTTP/1.1";
+	resp.first_line.HTTPVersion = "HTTP/1.1";
 	
 	// Get Status Code from request
-	resp.status_code = request.status_code;
+	resp.first_line.status_code = request.first_line.status_code;
 	
 	// Get status code description from status code
-	switch (resp.status_code) {
+	switch (resp.first_line.status_code) {
 		case 200:
-			resp.status_code_description = "OK";
+			resp.first_line.status_code_description = "OK";
 			break;
 		case 400:
-			resp.status_code_description = "Client Error";
+			resp.first_line.status_code_description = "Client Error";
 			break;
 		case 403:
-			resp.status_code_description = "Forbidden";
+			resp.first_line.status_code_description = "Forbidden";
 			break;
 		case 404:
-			resp.status_code_description = "Not Found";
+			resp.first_line.status_code_description = "Not Found";
 			break;
 		default:
 			perror("Invalid status code in request.");
