@@ -8,8 +8,6 @@
 
 class Framer {
 public:
-	// int GetNextMessage(int in, char *buf, size_t bufSize);
-
 	void append(std::string chars);
 
 	// Does this buffer contain at least one complete message?
@@ -27,7 +25,7 @@ public:
 protected:
 	std::queue<std::string> messages;
 	std::string curr_message;
-	char msg_buffer[1024];
+	// char msg_buffer[1024];
 	int delim_check=0;
 	int msg_count=0;
 };

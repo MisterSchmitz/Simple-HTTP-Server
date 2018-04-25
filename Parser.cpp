@@ -3,10 +3,16 @@
 #include <string>
 #include "Parser.hpp"
 
+/*HTTP request and response messages are plain-text, consisting of a 
+header section and an optional body section. The header section is 
+separated from the body section with a blank line. The header 
+consists of an initial line (which is different between requests and 
+responses), followed by zero or more key-value pairs. Every line is 
+terminated by a CRLF (carriage-return followed by a line feed). */
 HTTPRequest Parser::parse(std::string request){
 	HTTPRequest req;
-	// req.first_line.first_line.status_code = -1
 	
+	// Parse First Line
 	req.first_line.status_code = -1;
 	req.first_line.method = "";
 	req.first_line.path = "";
@@ -44,9 +50,18 @@ HTTPRequest Parser::parse(std::string request){
 	string HTTPversion = request.substr(pos, version_delim_idx-pos);
 	req.first_line.HTTPversion = HTTPversion;
 	
+	// Get all Header Key/Value pairs
+	
+	/* Get optional Body
+	Messages without a body section still have the trailing CRLF 
+	(a blank line) present so that the server knows that it should 
+	not expect additional headers. HTTP requests and responses can be 
+	of arbitrary size.*/
 	
 	// Valid request, set status_code
 	req.first_line.status_code = 200;
+	
+	// Parse Header
 	
 	return req;
 }

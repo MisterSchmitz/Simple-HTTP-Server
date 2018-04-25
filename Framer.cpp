@@ -7,65 +7,33 @@ using namespace std;
 void Framer::append(string chars)
 {	
 	int recv_count = chars.length();
-	// printf("%d bytes passed to? framer\n", recv_count);
-
-	// // consider framing using string methods!!!
-	// string delim = "\r\n";
-	// int curr_pos = 0;
-	// int delim_idx = chars.find(delim, curr_pos);
+	string delim = "\r\n\r\n";
+	size_t delim_len = delim.length();
+	int curr_pos = 0;
+	int prev_pos = 0;
+	size_t delim_pos;
 	
-	// // if delim not found before reaching end of receive buffer
-	// if (delim_idx == recv_count( {
-		// delim_check=0;
-		// curr_message.append(
-	// }
+	while (curr_pos < recv_count) {
+		prev_pos = curr_pos;
+		curr_pos = chars.find(delim, prev_pos);
 	
-	// // append to curr_message
-	
-	// // cout << chars.substr(curr_pos,delim_idx+1)<< '\t' << delim_idx << '\n';
-	
-	
-	char delims[2];
-	delims[0] = '\r';
-	delims[1] = '\n';
-	
-	// int end_seq_check;
-	int msg_ready=0;
-	
-	int count=0;
-	// extract messages from received string
-	while (count < recv_count) {
-		// find the delimiter
-		if (chars[count] == delims[0]) {
-			delim_check=1;
-		}
-		else if (chars[count] == delims[1]) {
-			if (delim_check == 1) {
-				msg_ready=1;
-				delim_check=0;
-				msg_buffer[msg_count]='\0';
+		// if delim not yet found, add what we have to curr_message
+		if (curr_pos >= recv_count) {
+			curr_message.append(chars);
+			// search for delim in message buffer (in case it was split between buffers)
+			delim_pos = curr_message.find(delim, 0);
+			if (delim_pos != curr_message.npos) {
+				messages.push(curr_message.substr(0, delim_pos));
+				curr_message = curr_message.substr(delim_pos+delim_len,curr_message.npos);
 			}
 		}
-		else if (delim_check==1) {
-			msg_buffer[msg_count]=chars[count-1];
-			msg_count++;
-			delim_check=0;
-		}
-		// add character to message buffer
+		// otherwise, add from prev_pos up to delim
 		else {
-			msg_buffer[msg_count]=chars[count];
-			msg_count++;
+			curr_message.append(chars.substr(prev_pos, curr_pos));
+			messages.push(curr_message);
+			curr_message = "";
+			curr_pos += delim_len;
 		}
-
-		// push message if we have a complete message
-		if (msg_ready) {
-			messages.push(msg_buffer);
-			memset(&msg_buffer[0], 0, sizeof(msg_buffer));  // clear message buffer
-			msg_count=0;
-			msg_ready=0;
-		}
-
-		count++;
 	}
 }
 

@@ -30,25 +30,27 @@ void HandleTCPClient(int clntSocket)
 			break;
 		}
 		
-		// Send received data to framer
+		// Pass received data to framer
 		recv_buffer[recv_count] = '\0';	// add a null terminator
 		f.append(recv_buffer);
 		
 		// Clear receive buffer
 		memset(&recv_buffer[0], 0, sizeof(recv_buffer));
 		
+		// Parse received messages
 		while (f.hasMessage()) {
 			string m = f.topMessage();
 			f.popMessage();
+			cout << m << "\n";
 			
+			// Pass message to parser... 			
 			// Parse ClientRequest
 			HTTPRequest req = p.parse(m);
-			string request = req.method+" "+req.path+" "+req.HTTPversion+"\n";
-			cout << request;
+			string request = req.first_line.method+" "+req.first_line.path+" "+req.first_line.HTTPversion+"\n";
 			
 			// Generate ServerResponse
 			HTTPResponse resp = p.respond(req);
-			string response = resp.HTTPVersion+" "+to_string(resp.status_code)+" "+resp.status_code_description;
+			string response = resp.first_line.HTTPVersion+" "+to_string(resp.first_line.status_code)+" "+resp.first_line.status_code_description;
 			
 			// Send response to client
 			string result = response.append("\r\n");
@@ -56,14 +58,14 @@ void HandleTCPClient(int clntSocket)
 			if (send_count < 0) {
 				DieWithError("Send result to client failed.\n");
 			}
-		}
+			// If client sent message to close socket, close.
+		}		
 	}
-	
     close(clntSocket);    /* Close client socket */
 }
 
 int CalcExecute(HTTPRequest req) {
-	if (req.method == "END") {
+	if (req.first_line.method == "END") {
 		return 1;
 	}
 	// else if (req.method == "SET") {

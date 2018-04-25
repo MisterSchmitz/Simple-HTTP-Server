@@ -54,7 +54,7 @@ void start_httpd(unsigned short port, string doc_root)
             DieWithError("accept() failed");
 
         /* clntSock is connected to a client! */
-        printf("Handling client %s\n", inet_ntoa(echoClntAddr.sin_addr));
+        // printf("Handling client %s\n", inet_ntoa(echoClntAddr.sin_addr));
 
         HandleTCPClient(clntSock);
     }
