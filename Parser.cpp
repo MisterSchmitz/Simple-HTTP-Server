@@ -7,7 +7,7 @@ HTTPRequest Parser::parse(std::string request)
 {
 	HTTPRequest req;
 	
-	req.response_code = "";
+	req.status_code = -1;
 	req.method = "";
 	req.path = "";
 	req.HTTPversion = "";
@@ -29,7 +29,7 @@ HTTPRequest Parser::parse(std::string request)
 	pos = method_delim_idx+1;
 	
 	if (req.method != "GET") {
-		req.response_code = "400";	 // We only support GET
+		req.status_code = 400;	 // We only support GET
 		return req;
 	}
 	
@@ -45,8 +45,42 @@ HTTPRequest Parser::parse(std::string request)
 	req.HTTPversion = HTTPversion;
 	
 	
-	// Valid request, set response_code
-	req.response_code = "200";
+	// Valid request, set status_code
+	req.status_code = 200;
 	
 	return req;
+}
+
+HTTPResponse Parser::respond(HTTPRequest request)
+{
+	HTTPResponse resp;
+	
+	resp.HTTPVersion = "";
+	resp.status_code = -1;
+	resp.status_code_description = "";
+	
+	// TODO: Pull supported HTTPVersion from Server
+	resp.HTTPVersion = "HTTP/1.1";
+	
+	// Get Status Code from request
+	resp.status_code = request.status_code;
+	
+	// Get status code description from status code
+	switch (resp.status_code) {
+		case 200:
+			resp.status_code_description = "OK";
+			break;
+		case 400:
+			resp.status_code_description = "Client Error";
+			break;
+		case 403:
+			resp.status_code_description = "Forbidden";
+			break;
+		case 404:
+			resp.status_code_description = "Not Found";
+			break;
+		default:
+			perror("Invalid status code in request.");
+	}
+	return resp;
 }

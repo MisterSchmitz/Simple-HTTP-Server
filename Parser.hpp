@@ -7,22 +7,42 @@
 
 using namespace std;
 
-// typedef struct HTTPRequest_t {
-	// // DEFINE YOUR DATA STRUCTURE HERE
-// } HTTPRequest;
+// typedef struct HTTPRequestFirstLine_t {
+	
+// } HTTPRequestFirstLine;
 
+// typedef struct HTTPRequestHeader_t {
+	
+// } HTTPRequestHeader;
 
 class HTTPRequest {
 public:
-	string response_code;
+	// HTTPRequestFirstLine_t HTTPRequestFirstLine;
+	int status_code;
 	string method;
 	string path;
 	string HTTPversion;
 };
 
+typedef struct HTTPResponseFirstLine_t {
+	
+} HTTPResponseFirstLine;
+
+typedef struct HTTPResponseHeader_t {
+	
+} HTTPResponseHeader;
+
+class HTTPResponse {
+public:
+	string HTTPVersion;
+	int status_code;
+	string status_code_description;
+};
+
 class Parser {
 public:
 	static HTTPRequest parse(string request);
+	static HTTPResponse respond(HTTPRequest request);
 };
 
 #endif // Parser_HPP

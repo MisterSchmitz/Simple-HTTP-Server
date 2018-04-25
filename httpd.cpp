@@ -6,7 +6,9 @@
 #include <unistd.h>     /* for close() */
 #include <iostream>
 #include "httpd.h"
+
 #define MAXPENDING 5    /* Maximum outstanding connection requests */
+#define MAXVERSION 1.1
 
 using namespace std;
 

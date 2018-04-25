@@ -27,10 +27,8 @@ void HandleTCPClient(int clntSocket)
 			DieWithError("Receive from client failed.\n");
 		}
 		if (recv_count == 0){
-			// printf("Client closed connection.\n");
 			break;
 		}
-		// printf("recv()'d %d bytes of data in buf\n", recv_count);
 		
 		// Send received data to framer
 		recv_buffer[recv_count] = '\0';	// add a null terminator
@@ -42,12 +40,18 @@ void HandleTCPClient(int clntSocket)
 		while (f.hasMessage()) {
 			string m = f.topMessage();
 			f.popMessage();
+			
+			// Parse ClientRequest
 			HTTPRequest req = p.parse(m);
-			string request = req.response_code+" "+req.method+" "+req.path+" "+req.HTTPversion;
-			// Send result to client
-			string result = request.append("\r\n");
-			// cout << result;
-			cout << req.response_code+"\n"+req.method+"\n"+req.path+"\n"+req.HTTPversion+"\n";
+			string request = req.method+" "+req.path+" "+req.HTTPversion+"\n";
+			cout << request;
+			
+			// Generate ServerResponse
+			HTTPResponse resp = p.respond(req);
+			string response = resp.HTTPVersion+" "+to_string(resp.status_code)+" "+resp.status_code_description;
+			
+			// Send response to client
+			string result = response.append("\r\n");
 			int send_count = send(clntSocket, result.c_str(), result.length(), 0);
 			if (send_count < 0) {
 				DieWithError("Send result to client failed.\n");
