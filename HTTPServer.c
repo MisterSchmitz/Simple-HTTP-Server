@@ -4,22 +4,28 @@
 #include <stdlib.h>     /* for atoi() and exit() */
 #include <string.h>     /* for memset() */
 #include <unistd.h>     /* for close() */
-#include <iostream>
-#include "httpd.h"
+
 #define MAXPENDING 5    /* Maximum outstanding connection requests */
 
-using namespace std;
+void DieWithError(const char *errorMessage);  /* Error handling function */
+void HandleTCPClient(int clntSocket);   /* TCP client handling function */
 
-void start_httpd(unsigned short port, string doc_root)
+int main(int argc, char *argv[])
 {
-	cerr << "Starting server (port: " << port <<
-		", doc_root: " << doc_root << ")" << endl;	
-
     int servSock;                    /* Socket descriptor for server */
     int clntSock;                    /* Socket descriptor for client */
     struct sockaddr_in echoServAddr; /* Local address */
     struct sockaddr_in echoClntAddr; /* Client address */
+    unsigned short echoServPort;     /* Server port */
     unsigned int clntLen;            /* Length of client address data structure */
+
+    if (argc != 2)     /* Test for correct number of arguments */
+    {
+        fprintf(stderr, "Usage:  %s <Server Port>\n", argv[0]);
+        exit(1);
+    }
+
+    echoServPort = atoi(argv[1]);  /* First arg:  local port */
 
     /* Create socket for incoming connections */
     if ((servSock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
@@ -30,7 +36,7 @@ void start_httpd(unsigned short port, string doc_root)
     memset(&echoServAddr, 0, sizeof(echoServAddr));   /* Zero out structure */
     echoServAddr.sin_family = AF_INET;                /* Internet address family */
     echoServAddr.sin_addr.s_addr = htonl(INADDR_ANY); /* Any incoming interface */
-    echoServAddr.sin_port = htons(port);      /* Local port */
+    echoServAddr.sin_port = htons(echoServPort);      /* Local port */
 
     /* Bind to the local address */
     if (bind(servSock, (struct sockaddr *) &echoServAddr, sizeof(echoServAddr)) < 0)
@@ -40,7 +46,7 @@ void start_httpd(unsigned short port, string doc_root)
     /* Mark the socket so it will listen for incoming connections */
     if (listen(servSock, MAXPENDING) < 0)
         DieWithError("listen() failed");
-	printf("Server listening on port %i\n", port);
+	printf("Server listening on port %i\n", echoServPort);
 
     for (;;) /* Run forever */
     {
@@ -60,4 +66,3 @@ void start_httpd(unsigned short port, string doc_root)
     }
     /* NOT REACHED */
 }
-
