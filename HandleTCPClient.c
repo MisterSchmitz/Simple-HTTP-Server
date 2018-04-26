@@ -50,13 +50,19 @@ void HandleTCPClient(int clntSocket)
 			
 			// Generate ServerResponse
 			HTTPResponse resp = p.respond(req);
-			string response = resp.first_line.HTTPVersion+" "+to_string(resp.first_line.status_code)+" "+resp.first_line.status_code_description;
+			string server_response = "";
+			string initial_line = resp.first_line.HTTPVersion+" "+to_string(resp.first_line.status_code)+" "+resp.first_line.status_code_description+"\r\n";
+			server_response.append(initial_line);
+			server_response.append(resp.header.server);
+			server_response.append(resp.header.last_modified);
+			server_response.append(resp.header.content_type);
+			server_response.append(resp.header.content_length);
+			server_response.append("\r\n");
 			
 			// Send response to client
-			string result = response.append("\r\n");
-			int send_count = send(clntSocket, result.c_str(), result.length(), 0);
+			int send_count = send(clntSocket, server_response.c_str(), server_response.length(), 0);
 			if (send_count < 0) {
-				DieWithError("Send result to client failed.\n");
+				DieWithError("Send response to client failed.\n");
 			}
 			// If client sent message to close socket, close.
 		}		

@@ -14,7 +14,7 @@ HTTPRequest Parser::parse(std::string request){
 	int request_len = request.length();
 	
 	// Parse First Line
-	req.first_line.status_code = -1;
+	req.first_line.status_code = 200; // Assume valid, fail later
 	req.first_line.method = "";
 	req.first_line.path = "";
 	req.first_line.HTTPversion = "";
@@ -28,7 +28,7 @@ HTTPRequest Parser::parse(std::string request){
 	int method_delim_idx = request.find(method_delim, pos);
 	
 	if (method_delim_idx == -1) {
-		req.first_line.method = "END";
+		req.first_line.status_code = 400;
 		return req;
 	}
 
@@ -36,7 +36,7 @@ HTTPRequest Parser::parse(std::string request){
 	pos = method_delim_idx+1;
 	
 	if (req.first_line.method != "GET") {
-		req.first_line.status_code = 400;	 // We only support GET
+		req.first_line.status_code = 400;
 		return req;
 	}
 	
@@ -51,13 +51,17 @@ HTTPRequest Parser::parse(std::string request){
 	string HTTPversion = request.substr(pos, version_delim_idx-pos);
 	req.first_line.HTTPversion = HTTPversion;
 	pos = version_delim_idx+version_delim.length();
-	
-	// Valid request, set status_code
-	req.first_line.status_code = 200;
+
+	if (req.first_line.HTTPversion != "HTTP/1.1") {
+		req.first_line.status_code = 400;
+		return req;
+	}
 	
 	// Get Key/Value pairs
 	string key_delim = ": ";
 	string value_delim = "\r\n";
+	
+	// TODO: Any request headers not in the proper form (e.g., missing a colon), should signal a 400 error.
 	while (pos < request_len) {
 		string value;
 		
@@ -73,7 +77,7 @@ HTTPRequest Parser::parse(std::string request){
 			value = request.substr(pos, value_delim_idx-pos);
 		}
 		
-		req.keys.insert(pair<string, string>(key, value));
+		req.header.insert(pair<string, string>(key, value));
 
 		if (value_delim_idx == -1) {
 			break;
@@ -84,27 +88,29 @@ HTTPRequest Parser::parse(std::string request){
 	}
 	
 	// Verify host key present
-	if(req.keys.count("Host") == 0){
+	if(req.header.count("Host") == 0){
 		req.first_line.status_code = 400;
 	};
+	
+	// TODO: Connection (optional, if set to “close” then server should close connection with the client after sending response for this request)
 	
 	return req;
 }
 
-HTTPResponse Parser::respond(HTTPRequest request) {
+HTTPResponse Parser::respond(HTTPRequest req) {
 	HTTPResponse resp;
 	
 	resp.first_line.HTTPVersion = "";
 	resp.first_line.status_code = -1;
 	resp.first_line.status_code_description = "";
 	
-	// TODO: Pull supported HTTPVersion from Server
+	// Highest HTTP version that the server supports
 	resp.first_line.HTTPVersion = "HTTP/1.1";
 	
-	// Get Status Code from request
-	resp.first_line.status_code = request.first_line.status_code;
+	// Status of the request
+	resp.first_line.status_code = req.first_line.status_code;
 	
-	// Get status code description from status code
+	// Status code description
 	switch (resp.first_line.status_code) {
 		case 200:
 			resp.first_line.status_code_description = "OK";
@@ -121,5 +127,25 @@ HTTPResponse Parser::respond(HTTPRequest request) {
 		default:
 			perror("Invalid status code in request.");
 	}
+	
+	// Headers
+	// Server name
+	resp.header.server = "Server: mjs\r\n";
+
+	if (resp.first_line.status_code != 200){
+		return resp;
+	}
+
+	// Last-Modified (required only if return type is 200)
+	// <day-name>, <day> <month> <year> <hour>:<minute>:<second> GMT
+	resp.header.last_modified = "Last-Modified: TODO\r\n";
+	
+	// Content-Type (required if return type is 200; otherwise if you create a custom error page, you can set this to ‘text/html’)
+	// The Content-Type for .jpg files should be “image/jpeg”, for .png files it should be “image/png”, and for html it should be “text/html”
+	resp.header.content_type = "Content-Type: TODO\r\n";
+	
+	// Content-Length (required if return type is 200; otherwise if you create a custom error page, you can set this to the length of that response)
+	resp.header.content_length = "Content-Length: TODO\r\n";
+	
 	return resp;
 }

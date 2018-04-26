@@ -18,7 +18,7 @@ struct HTTPRequestFirstLine_t {
 class HTTPRequest {
 public:
 	HTTPRequestFirstLine_t first_line;
-	unordered_map<string, string> keys;
+	unordered_map<string, string> header;
 };
 
 // typedef struct HTTPResponseFirstLine_t {
@@ -33,11 +33,20 @@ struct HTTPResponseFirstLine_t {
 	string HTTPVersion;
 	int status_code;
 	string status_code_description;
-} ;
+};
+
+struct HTTPResponseHeader_t {
+    string server;
+    string last_modified;
+    string content_type;
+    string content_length;
+};
 
 class HTTPResponse {
 public:
 	HTTPResponseFirstLine_t first_line;
+	HTTPResponseHeader_t header;
+	string body; // TODO: Change type?
 };
 
 class Parser {
