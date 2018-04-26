@@ -11,6 +11,7 @@ responses), followed by zero or more key-value pairs. Every line is
 terminated by a CRLF (carriage-return followed by a line feed). */
 HTTPRequest Parser::parse(std::string request){
 	HTTPRequest req;
+	int request_len = request.length();
 	
 	// Parse First Line
 	req.first_line.status_code = -1;
@@ -26,7 +27,7 @@ HTTPRequest Parser::parse(std::string request){
 	// Find method delimiter
 	int method_delim_idx = request.find(method_delim, pos);
 	
-	if (method_delim_idx==-1) {
+	if (method_delim_idx == -1) {
 		req.first_line.method = "END";
 		return req;
 	}
@@ -49,19 +50,43 @@ HTTPRequest Parser::parse(std::string request){
 	int version_delim_idx = request.find(version_delim, pos);
 	string HTTPversion = request.substr(pos, version_delim_idx-pos);
 	req.first_line.HTTPversion = HTTPversion;
-	
-	// Get all Header Key/Value pairs
-	
-	/* Get optional Body
-	Messages without a body section still have the trailing CRLF 
-	(a blank line) present so that the server knows that it should 
-	not expect additional headers. HTTP requests and responses can be 
-	of arbitrary size.*/
+	pos = version_delim_idx+version_delim.length();
 	
 	// Valid request, set status_code
 	req.first_line.status_code = 200;
 	
-	// Parse Header
+	// Get Key/Value pairs
+	string key_delim = ": ";
+	string value_delim = "\r\n";
+	while (pos < request_len) {
+		string value;
+		
+		int key_delim_idx = request.find(key_delim, pos);
+		string key = request.substr(pos, key_delim_idx-pos);
+		pos = key_delim_idx+key_delim.length();
+			
+		int value_delim_idx = request.find(value_delim, pos);
+		if (value_delim_idx == -1) {
+			value = request.substr(pos, request_len-pos);
+		}
+		else {
+			value = request.substr(pos, value_delim_idx-pos);
+		}
+		
+		req.keys.insert(pair<string, string>(key, value));
+
+		if (value_delim_idx == -1) {
+			break;
+		}
+		else {
+			pos = value_delim_idx+value_delim.length();
+		}
+	}
+	
+	// Verify host key present
+	if(req.keys.count("Host") == 0){
+		req.first_line.status_code = 400;
+	};
 	
 	return req;
 }

@@ -6,11 +6,11 @@ using namespace std;
 
 void Framer::append(string chars)
 {	
-	int recv_count = chars.length();
+	size_t recv_count = chars.length();
 	string delim = "\r\n\r\n";
 	size_t delim_len = delim.length();
-	int curr_pos = 0;
-	int prev_pos = 0;
+	size_t curr_pos = 0;
+	size_t prev_pos = 0;
 	size_t delim_pos;
 	
 	while (curr_pos < recv_count) {

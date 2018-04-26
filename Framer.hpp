@@ -25,7 +25,6 @@ public:
 protected:
 	std::queue<std::string> messages;
 	std::string curr_message;
-	// char msg_buffer[1024];
 	int delim_check=0;
 	int msg_count=0;
 };

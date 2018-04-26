@@ -2,6 +2,7 @@
 #define Parser_HPP
 
 #include <string>
+#include <unordered_map>
 #include <stdint.h>
 #include <inttypes.h>
 
@@ -12,18 +13,12 @@ struct HTTPRequestFirstLine_t {
 	string method;
 	string path;
 	string HTTPversion;
-} ;
-
-struct HTTPRequestHeaderKeyValues_t {
-    string Host;		// (required, 400 client error if not present)
-    string Connection;	//(optional, if set to “close” then server should close connection with the client after sending response for this request)
-	string Other;		// Should gracefully handle any other valid request headers that the client sends. Any request headers not in the proper form (e.g., missing a colon), should signal a 400 error.
-} ;
+};
 
 class HTTPRequest {
 public:
 	HTTPRequestFirstLine_t first_line;
-	HTTPRequestHeaderKeyValues_t headerkvs;
+	unordered_map<string, string> keys;
 };
 
 // typedef struct HTTPResponseFirstLine_t {
