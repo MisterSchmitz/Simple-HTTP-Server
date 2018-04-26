@@ -37,22 +37,14 @@ void Framer::append(string chars)
 	}
 }
 
-bool Framer::hasMessage() const
-{
+bool Framer::hasMessage() const {
 	return !(messages.empty());
 }
 
-string Framer::topMessage() const
-{
+string Framer::topMessage() const {
 	return messages.front();
 }
 
-void Framer::popMessage()
-{
+void Framer::popMessage() {
 	messages.pop();
 }
-
-// void Framer::printToStream(ostream& stream) const
-// {
-	// // PUT YOUR CODE HERE
-// }

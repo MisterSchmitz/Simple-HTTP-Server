@@ -11,8 +11,6 @@
 
 using namespace std;
 
-int CalcExecute(HTTPRequest req);
-
 void HandleTCPClient(int clntSocket)
 {
 	Framer f;
@@ -68,20 +66,4 @@ void HandleTCPClient(int clntSocket)
 		}		
 	}
     close(clntSocket);    /* Close client socket */
-}
-
-int CalcExecute(HTTPRequest req) {
-	if (req.first_line.method == "END") {
-		return 1;
-	}
-	// else if (req.method == "SET") {
-		// acc = req.value;
-	// }
-	// else if (req.method == "ADD") {
-		// acc += req.value;
-	// }
-	// else if (req.method == "SUB") {
-		// acc -= req.value;
-	// }
-	return 0;
 }

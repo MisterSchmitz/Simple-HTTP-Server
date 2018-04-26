@@ -21,14 +21,6 @@ public:
 	unordered_map<string, string> header;
 };
 
-// typedef struct HTTPResponseFirstLine_t {
-	
-// } HTTPResponseFirstLine;
-
-// typedef struct HTTPResponseHeader_t {
-	
-// } HTTPResponseHeader;
-
 struct HTTPResponseFirstLine_t {
 	string HTTPVersion;
 	int status_code;
