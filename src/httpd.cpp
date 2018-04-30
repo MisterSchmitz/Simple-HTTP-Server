@@ -5,7 +5,7 @@
 #include <string.h>     /* for memset() */
 #include <unistd.h>     /* for close() */
 #include <iostream>
-#include "httpd.h"
+#include "httpd.hpp"
 
 #define MAXPENDING 5    /* Maximum outstanding connection requests */
 #define MAXVERSION 1.1
@@ -56,7 +56,7 @@ void start_httpd(unsigned short port, string doc_root)
         /* clntSock is connected to a client! */
         // printf("Handling client %s\n", inet_ntoa(echoClntAddr.sin_addr));
 
-        HandleTCPClient(clntSock);
+        HandleTCPClient(clntSock, doc_root);
     }
     /* NOT REACHED */
 }

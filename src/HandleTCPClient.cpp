@@ -5,13 +5,13 @@
 #include <unistd.h>     /* for close() */
 #include <iostream>
 #include <assert.h>
-#include "httpd.h"
+#include "httpd.hpp"
 #include "Framer.hpp"
 #include "Parser.hpp"
 
 using namespace std;
 
-void HandleTCPClient(int clntSocket)
+void HandleTCPClient(int clntSocket, string doc_root)
 {
 	Framer f;
 	Parser p;
@@ -46,7 +46,8 @@ void HandleTCPClient(int clntSocket)
 			HTTPRequest req = p.parse(m);
 			string request = req.first_line.method+" "+req.first_line.path+" "+req.first_line.HTTPversion+"\n";
 			
-			// Generate ServerResponse
+			// Generate Server Response 
+			// Header
 			HTTPResponse resp = p.respond(req);
 			string server_response = "";
 			string initial_line = resp.first_line.HTTPVersion+" "+to_string(resp.first_line.status_code)+" "+resp.first_line.status_code_description+"\r\n";
@@ -56,6 +57,13 @@ void HandleTCPClient(int clntSocket)
 			server_response.append(resp.header.content_type);
 			server_response.append(resp.header.content_length);
 			server_response.append("\r\n");
+			
+			// Body
+			// Helper function for generating body
+			if (resp.first_line.status_code == 200) {
+				// Do body stuff
+				cout << doc_root;
+			}				
 			
 			// Send response to client
 			int send_count = send(clntSocket, server_response.c_str(), server_response.length(), 0);

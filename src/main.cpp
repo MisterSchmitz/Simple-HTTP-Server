@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <limits.h>
-#include "httpd.h"
+#include "httpd.hpp"
 
 using namespace std;
 
