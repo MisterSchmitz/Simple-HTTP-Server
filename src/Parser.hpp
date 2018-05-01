@@ -44,12 +44,13 @@ public:
 };
 
 class Parser {
-    bool canRead=0;
-	char * lastModified;
+    bool canRead;
+	string lastModified;
 public:
 	HTTPRequest parse(string request);
 	HTTPResponse respond(HTTPRequest request, string doc_root);
 	void getFileStatistics(const char * file_path);
+	void clearBuffers();
 };
 
 #endif // Parser_HPP

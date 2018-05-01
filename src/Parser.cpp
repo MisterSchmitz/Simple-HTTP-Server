@@ -150,7 +150,7 @@ HTTPResponse Parser::respond(HTTPRequest req, string doc_root) {
 
 	// Last-Modified (required only if return type is 200)
 	// <day-name>, <day> <month> <year> <hour>:<minute>:<second> GMT
-//	resp.header.last_modified = "Last-Modified: "+lastModified+"\r\n";
+	resp.header.last_modified = "Last-Modified: "+lastModified+"\r\n";
 
 	// Content-Type (required if return type is 200; otherwise if you create a custom error page, you can set this to ‘text/html’)
 	// The Content-Type for .jpg files should be “image/jpeg”, for .png files it should be “image/png”, and for html it should be “text/html”
@@ -160,6 +160,10 @@ HTTPResponse Parser::respond(HTTPRequest req, string doc_root) {
 	resp.header.content_length = "Content-Length: TODO\r\n";
 
 	return resp;
+}
+
+void Parser::clearBuffers() {
+//    canRead = false;
 }
 
 void Parser::getFileStatistics(const char * file_path) {
@@ -179,13 +183,10 @@ void Parser::getFileStatistics(const char * file_path) {
 		   (unsigned long) sb.st_mode);
 
 	// Last-Modified: <day-name>, <day> <month> <year> <hour>:<minute>:<second> GMT
-//	printf("Last file modification: %s", ctime(&sb.st_mtime));
-//	char datetime[30];
-//	strftime(datetime, max, "%a, %d %b %Y %H:%M:%S GMT", ctime(&sb.st_mtime));
-//	strftime(lastModified, max, "%a, %d %b %Y %H:%M:%S GMT", ctime(&sb.st_mtime));
-	// Format:
-//	lastModified = ctime(&sb.st_mtime); //TODO: Check GMT timezone
-//	datetime[0] = 0;
+	char datetime[30];
+	const char * format = "%a, %d %b %Y %H:%M:%S GMT";
+	int err = strftime(datetime, sizeof(datetime), format, gmtime(&sb.st_mtime));
+	lastModified = string(datetime);
 
 //	printf("File size:                %lld bytes\n",
 //		   (long long) sb.st_size);

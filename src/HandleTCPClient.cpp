@@ -48,6 +48,7 @@ void HandleTCPClient(int clntSocket, string doc_root)
 			
 			// Generate Server Response 
 			// Header
+			p.clearBuffers();
 			HTTPResponse resp = p.respond(req, doc_root);
 			string server_response = "";
 			string initial_line = resp.first_line.HTTPVersion+" "+to_string(resp.first_line.status_code)+" "+resp.first_line.status_code_description+"\r\n";
