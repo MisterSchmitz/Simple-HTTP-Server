@@ -1,10 +1,12 @@
 #ifndef Parser_HPP
 #define Parser_HPP
 
-#include <string>
 #include <unordered_map>
 #include <stdint.h>
 #include <inttypes.h>
+#include <string>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 using namespace std;
 
@@ -42,9 +44,12 @@ public:
 };
 
 class Parser {
+    bool canRead=0;
+	char * lastModified;
 public:
-	static HTTPRequest parse(string request);
-	static HTTPResponse respond(HTTPRequest request);
+	HTTPRequest parse(string request);
+	HTTPResponse respond(HTTPRequest request, string doc_root);
+	void getFileStatistics(const char * file_path);
 };
 
 #endif // Parser_HPP

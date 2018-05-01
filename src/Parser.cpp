@@ -1,6 +1,8 @@
 #include <assert.h>
 #include <iostream>
 #include <string>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include "Parser.hpp"
 
 /*HTTP request and response messages are plain-text, consisting of a 
@@ -24,7 +26,7 @@ HTTPRequest Parser::parse(std::string request){
 	string version_delim = "\r\n";
 	int pos = 0;
 	
-	// Find method delimiter
+	// Find method
 	int method_delim_idx = request.find(method_delim, pos);
 	
 	if (method_delim_idx == -1) {
@@ -40,13 +42,13 @@ HTTPRequest Parser::parse(std::string request){
 		return req;
 	}
 	
-	// Find path delimiter
+	// Find path
 	int path_delim_idx = request.find(path_delim, pos);
 	string path = request.substr(pos, path_delim_idx-pos);
 	req.first_line.path = path;
 	pos = path_delim_idx+1;
 	
-	// Find HTTPversion delimiter
+	// Find HTTPversion
 	int version_delim_idx = request.find(version_delim, pos);
 	string HTTPversion = request.substr(pos, version_delim_idx-pos);
 	req.first_line.HTTPversion = HTTPversion;
@@ -97,19 +99,19 @@ HTTPRequest Parser::parse(std::string request){
 	return req;
 }
 
-HTTPResponse Parser::respond(HTTPRequest req) {
+HTTPResponse Parser::respond(HTTPRequest req, string doc_root) {
 	HTTPResponse resp;
-	
+
 	resp.first_line.HTTPVersion = "";
 	resp.first_line.status_code = -1;
 	resp.first_line.status_code_description = "";
-	
+
 	// Highest HTTP version that the server supports
 	resp.first_line.HTTPVersion = "HTTP/1.1";
-	
+
 	// Status of the request
 	resp.first_line.status_code = req.first_line.status_code;
-	
+
 	// Status code description
 	switch (resp.first_line.status_code) {
 		case 200:
@@ -127,25 +129,66 @@ HTTPResponse Parser::respond(HTTPRequest req) {
 		default:
 			perror("Invalid status code in request.");
 	}
-	
+
 	// Headers
 	// Server name
 	resp.header.server = "Server: mjs\r\n";
 
-	if (resp.first_line.status_code != 200){
+	if (resp.first_line.status_code != 200) {
 		return resp;
 	}
 
+	// Get file statistics
+	const char * req_path;
+//	string test_path = doc_root+"/index.html";
+//	req_path = test_path.c_str();
+	string full_path = doc_root.substr(0,doc_root.length()-1)+req.first_line.path;
+	req_path = full_path.c_str();
+
+	printf("Requested path: %s\n", req_path);
+	getFileStatistics(req_path);
+
 	// Last-Modified (required only if return type is 200)
 	// <day-name>, <day> <month> <year> <hour>:<minute>:<second> GMT
-	resp.header.last_modified = "Last-Modified: TODO\r\n";
-	
+//	resp.header.last_modified = "Last-Modified: "+lastModified+"\r\n";
+
 	// Content-Type (required if return type is 200; otherwise if you create a custom error page, you can set this to ‘text/html’)
 	// The Content-Type for .jpg files should be “image/jpeg”, for .png files it should be “image/png”, and for html it should be “text/html”
 	resp.header.content_type = "Content-Type: TODO\r\n";
-	
+
 	// Content-Length (required if return type is 200; otherwise if you create a custom error page, you can set this to the length of that response)
 	resp.header.content_length = "Content-Length: TODO\r\n";
-	
+
 	return resp;
+}
+
+void Parser::getFileStatistics(const char * file_path) {
+	struct stat sb;
+
+	if (stat(file_path, &sb) == -1) {
+		perror("stat");
+		exit(EXIT_FAILURE);
+	} else {
+		printf("Found file.\n");
+	}
+
+	printf("Can read: %i\n", canRead);
+	mode_t file_permission = sb.st_mode;
+	canRead = (file_permission & S_IROTH);
+	printf("Mode: %lo (octal)\n",
+		   (unsigned long) sb.st_mode);
+
+	// Last-Modified: <day-name>, <day> <month> <year> <hour>:<minute>:<second> GMT
+//	printf("Last file modification: %s", ctime(&sb.st_mtime));
+//	char datetime[30];
+//	strftime(datetime, max, "%a, %d %b %Y %H:%M:%S GMT", ctime(&sb.st_mtime));
+//	strftime(lastModified, max, "%a, %d %b %Y %H:%M:%S GMT", ctime(&sb.st_mtime));
+	// Format:
+//	lastModified = ctime(&sb.st_mtime); //TODO: Check GMT timezone
+//	datetime[0] = 0;
+
+//	printf("File size:                %lld bytes\n",
+//		   (long long) sb.st_size);
+//	printf("Blocks allocated:         %lld\n",
+//		   (long long) sb.st_blocks);
 }

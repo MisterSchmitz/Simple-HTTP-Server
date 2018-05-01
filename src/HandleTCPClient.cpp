@@ -48,7 +48,7 @@ void HandleTCPClient(int clntSocket, string doc_root)
 			
 			// Generate Server Response 
 			// Header
-			HTTPResponse resp = p.respond(req);
+			HTTPResponse resp = p.respond(req, doc_root);
 			string server_response = "";
 			string initial_line = resp.first_line.HTTPVersion+" "+to_string(resp.first_line.status_code)+" "+resp.first_line.status_code_description+"\r\n";
 			server_response.append(initial_line);
@@ -63,7 +63,7 @@ void HandleTCPClient(int clntSocket, string doc_root)
 			if (resp.first_line.status_code == 200) {
 				// Do body stuff
 				cout << doc_root;
-			}				
+			}
 			
 			// Send response to client
 			int send_count = send(clntSocket, server_response.c_str(), server_response.length(), 0);
