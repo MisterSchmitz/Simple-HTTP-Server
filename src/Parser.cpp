@@ -152,12 +152,13 @@ HTTPResponse Parser::respond(HTTPRequest req, string doc_root) {
 	// <day-name>, <day> <month> <year> <hour>:<minute>:<second> GMT
 	resp.header.last_modified = "Last-Modified: "+lastModified+"\r\n";
 
-	// Content-Type (required if return type is 200; otherwise if you create a custom error page, you can set this to ‘text/html’)
+	// TODO: Content-Type (required if return type is 200; otherwise if you create a custom error page, you can set this to ‘text/html’)
 	// The Content-Type for .jpg files should be “image/jpeg”, for .png files it should be “image/png”, and for html it should be “text/html”
 	resp.header.content_type = "Content-Type: TODO\r\n";
 
-	// Content-Length (required if return type is 200; otherwise if you create a custom error page, you can set this to the length of that response)
-	resp.header.content_length = "Content-Length: TODO\r\n";
+	// TODO: Content-Length (required if return type is 200; otherwise if you create a custom error page, you can set this to the length of that response)
+	// Content-Length header is used to know when the response body is finished and the next response header will begin (for pipelined requests)
+	resp.header.content_length = "Content-Length: "+to_string(contentLength)+"\r\n";
 
 	return resp;
 }
@@ -188,8 +189,12 @@ void Parser::getFileStatistics(const char * file_path) {
 	int err = strftime(datetime, sizeof(datetime), format, gmtime(&sb.st_mtime));
 	lastModified = string(datetime);
 
-//	printf("File size:                %lld bytes\n",
-//		   (long long) sb.st_size);
+	// Content-length
+	printf("File size:                %lld bytes\n",
+		   (long long) sb.st_size);
+	contentLength = sb.st_size;
+
+
 //	printf("Blocks allocated:         %lld\n",
 //		   (long long) sb.st_blocks);
 }

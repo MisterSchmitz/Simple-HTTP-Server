@@ -46,6 +46,8 @@ public:
 class Parser {
     bool canRead;
 	string lastModified;
+	long long contentLength;
+
 public:
 	HTTPRequest parse(string request);
 	HTTPResponse respond(HTTPRequest request, string doc_root);
