@@ -76,14 +76,14 @@ void HandleTCPClient(int clntSocket, string doc_root)
 					DieWithError("Send body response to client failed.\n");
 				}
 			}
-			// If client sent message to close socket, close.
-            if (req.header.count("Connection")) {
-			    string value = req.header.at(("Connection"));
-			    if (value=="close") {
-					f.reset();
-					close(clntSocket);
-			    }
-			}
+//			// If client sent message to close socket, close.
+//            if (req.header.count("Connection")) {
+//			    string value = req.header.at(("Connection"));
+//			    if (value=="close") {
+//					f.reset();
+//					close(clntSocket);
+//			    }
+//			}
 		}
 	}
     close(clntSocket);    /* Close client socket */

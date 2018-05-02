@@ -60,4 +60,3 @@ void start_httpd(unsigned short port, string doc_root)
     }
     /* NOT REACHED */
 }
-
