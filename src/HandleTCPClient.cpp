@@ -21,14 +21,25 @@ void HandleTCPClient(int clntSocket, string doc_root)
 
 	char recv_buffer[1024];
 
-	while (1) {
-		// Read data from client
-		int recv_count = recv(clntSocket, recv_buffer, sizeof(recv_buffer)-1, 0);
+	// Read data from client
+	int recv_count = recv(clntSocket, recv_buffer, sizeof(recv_buffer)-1, 0);
+
+	if (recv_count < 0 && errno == EWOULDBLOCK) {
+		printf("Closing socket due to timeout\n");
+		close(clntSocket);
+		return;
+	}
+	if (recv_count < 0) {
+		DieWithError("Receive from client failed.\n");
+	}
+
+	while (recv_count > 0) {
+		if (recv_count < 0 && errno == EWOULDBLOCK) {
+			printf("Closing socket due to timeout\n");
+			break;
+		}
 		if (recv_count < 0) {
 			DieWithError("Receive from client failed.\n");
-		}
-		if (recv_count == 0){
-			break;
 		}
 
 		// Pass received data to framer
@@ -76,15 +87,18 @@ void HandleTCPClient(int clntSocket, string doc_root)
 					DieWithError("Send body response to client failed.\n");
 				}
 			}
-//			// If client sent message to close socket, close.
-//            if (req.header.count("Connection")) {
-//			    string value = req.header.at(("Connection"));
-//			    if (value=="close") {
-//					f.reset();
-//					close(clntSocket);
-//			    }
-//			}
+
+			// If client sent message to close socket, close.
+            if (req.header.count("Connection")) {
+			    string value = req.header.at(("Connection"));
+			    if (value=="close") {
+					f.reset();
+					close(clntSocket);
+					return;
+			    }
+			}
 		}
+		recv_count = recv(clntSocket, recv_buffer, sizeof(recv_buffer)-1, 0);
 	}
 	close(clntSocket);    /* Close client socket */
 }

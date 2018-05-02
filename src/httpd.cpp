@@ -81,9 +81,7 @@ void start_httpd(unsigned short port, string root_arg)
         }
         printf("with thread %lu\n", (unsigned long int) threadId);
 
-//        HandleTCPClient(clntSock, doc_root);
     }
-    /* NOT REACHED */
 }
 
 void *ThreadMain(void *threadArgs) {
