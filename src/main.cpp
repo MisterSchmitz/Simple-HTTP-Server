@@ -30,9 +30,9 @@ int main(int argc, char *argv[])
 		return 3;
 	}
 
-	string doc_root = argv[2];
+	const string root_arg = argv[2];
 
-	start_httpd(port, doc_root);
+	start_httpd(port, root_arg);
 
 	return 0;
 }

@@ -18,9 +18,9 @@ void HandleTCPClient(int clntSocket, string doc_root)
 {
 	Framer f;
 	Parser p;
-	
+
 	char recv_buffer[1024];
-	
+
 	while (1) {
 		// Read data from client
 		int recv_count = recv(clntSocket, recv_buffer, sizeof(recv_buffer)-1, 0);
@@ -30,25 +30,25 @@ void HandleTCPClient(int clntSocket, string doc_root)
 		if (recv_count == 0){
 			break;
 		}
-		
+
 		// Pass received data to framer
 		recv_buffer[recv_count] = '\0';	// add a null terminator
 		f.append(recv_buffer);
-		
+
 		// Clear receive buffer
 		memset(&recv_buffer[0], 0, sizeof(recv_buffer));
-		
+
 		// Parse received messages
 		while (f.hasMessage()) {
 			string m = f.topMessage();
 			f.popMessage();
 			cout << m << "\n";
-			
+
 			// Pass message to parser... 			
 			// Parse ClientRequest
 			HTTPRequest req = p.parse(m);
 			string request = req.first_line.method+" "+req.first_line.path+" "+req.first_line.HTTPversion+"\n";
-			
+
 			// Generate Server Response 
 			// Header
 			p.clearBuffers();
@@ -86,7 +86,7 @@ void HandleTCPClient(int clntSocket, string doc_root)
 //			}
 		}
 	}
-    close(clntSocket);    /* Close client socket */
+	close(clntSocket);    /* Close client socket */
 }
 
 /* Read all bytes from a file into a vector
