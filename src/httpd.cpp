@@ -92,6 +92,14 @@ void *ThreadMain(void *threadArgs) {
     int clntSock = ((struct ThreadArgs *) threadArgs)->clntSock;
     free(threadArgs);
 
+    /* Set a receive timeout on the client socket */
+    struct timeval timeout;
+    timeout.tv_sec = 5;
+    if (setsockopt (clntSock, SOL_SOCKET, SO_RCVTIMEO, (struct timeval *)&timeout,
+                    sizeof(timeout)) < 0) {
+        perror("setsockopt failed\n");
+    }
+
     HandleTCPClient(clntSock, doc_root);
 
     return (NULL);

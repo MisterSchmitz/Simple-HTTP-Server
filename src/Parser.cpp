@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <iostream>
 #include <string>
+#include <algorithm>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <limits.h>
@@ -65,17 +66,29 @@ HTTPRequest Parser::parse(std::string request){
 	}
 	
 	// Get Key/Value pairs
-	string key_delim = ": ";
+	string key_delim = ":";
 	string value_delim = "\r\n";
-	
-	// TODO: Any request headers not in the proper form (e.g., missing a colon), should signal a 400 error.
 	while (pos < request_len) {
-		string value;
-		
+        // Check for <CRLF> before key_delim
+	    // Find key
+        string key;
 		int key_delim_idx = request.find(key_delim, pos);
-		string key = request.substr(pos, key_delim_idx-pos);
+		if (key_delim_idx == -1) {
+            req.first_line.status_code=400;
+            return req;
+		}
+		key = request.substr(pos, key_delim_idx-pos);
+
+		// Check for spaces in key
+        size_t n = std::count(key.begin(), key.end(), ' ');
+        if (n > 0) {
+            req.first_line.status_code=400;
+            return req;
+        }
+
+        // Find Value
+        string value;
 		pos = key_delim_idx+key_delim.length();
-			
 		int value_delim_idx = request.find(value_delim, pos);
 		if (value_delim_idx == -1) {
 			value = request.substr(pos, request_len-pos);
@@ -83,7 +96,15 @@ HTTPRequest Parser::parse(std::string request){
 		else {
 			value = request.substr(pos, value_delim_idx-pos);
 		}
-		
+
+		// Check for more than one leading space in value
+        size_t found = value.find_first_not_of(' ', 0);
+		if (found > 1) {
+            req.first_line.status_code=400;
+            return req;
+		}
+
+		// Valid Key/value pair
 		req.header.insert(pair<string, string>(key, value));
 
 		if (value_delim_idx == -1) {
