@@ -195,7 +195,7 @@ int Parser::getFileStatistics(const char * file_path) {
 	// Last-Modified: <day-name>, <day> <month> <year> <hour>:<minute>:<second> GMT
 	char datetime[30];
 	const char * format = "%a, %d %b %Y %H:%M:%S GMT";
-	int err = strftime(datetime, sizeof(datetime), format, gmtime(&sb.st_mtime));
+	strftime(datetime, sizeof(datetime), format, gmtime(&sb.st_mtime));
 	lastModified = string(datetime);
 
 	// Content-length
