@@ -70,28 +70,33 @@ void HandleTCPClient(int clntSocket, string doc_root)
 
 			// If applicable, send response body to client
 			if (resp.first_line.status_code == 200) {
-
 				vector<char> content = ReadAllBytes(p.contentPath.c_str());
-
 				int send_body_count = send(clntSocket, &content[0], content.size(), 0);
 				if (send_body_count < 0) {
 					DieWithError("Send body response to client failed.\n");
 				}
 			}
 			// If client sent message to close socket, close.
-		}		
+            if (req.header.count("Connection")) {
+			    string value = req.header.at(("Connection"));
+			    if (value=="close") {
+					f.reset();
+					close(clntSocket);
+			    }
+			}
+		}
 	}
     close(clntSocket);    /* Close client socket */
 }
 
+/* Read all bytes from a file into a vector
+ * https://codereview.stackexchange.com/questions/22901/reading-all-bytes-from-a-file
+ */
 vector<char> ReadAllBytes(char const* filename) {
 	ifstream ifs(filename, ios::binary|ios::ate);
 	ifstream::pos_type pos = ifs.tellg();
-
 	std::vector<char>  result(pos);
-
 	ifs.seekg(0, ios::beg);
 	ifs.read(&result[0], pos);
-
 	return result;
 }

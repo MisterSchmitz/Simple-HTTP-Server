@@ -12,6 +12,7 @@ public:
 	bool hasMessage() const;
 	std::string topMessage() const;
 	void popMessage();
+	void reset();
 
 protected:
 	std::queue<std::string> messages;

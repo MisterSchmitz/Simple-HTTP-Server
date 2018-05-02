@@ -98,9 +98,7 @@ HTTPRequest Parser::parse(std::string request){
 	if(req.header.count("Host") == 0){
 		req.first_line.status_code = 400;
 	};
-	
-	// TODO: Connection (optional, if set to “close” then server should close connection with the client after sending response for this request)
-	
+
 	return req;
 }
 
@@ -127,7 +125,6 @@ HTTPResponse Parser::respond(HTTPRequest req, string doc_root) {
 		return resp;
 	}
 
-//	string full_path = doc_root.substr(0,doc_root.length()-1)+req.first_line.path;
 	string full_path = doc_root+req.first_line.path;
 	const char * req_path = full_path.c_str();
 	printf("Requested path: %s\n", req_path);
@@ -135,7 +132,7 @@ HTTPResponse Parser::respond(HTTPRequest req, string doc_root) {
 	char pathbuf[1024];
 	char *res_path = realpath(req_path, pathbuf);
 	if (res_path) {
-		printf("This source is at %s.\n", pathbuf);
+		printf("Resolved path: %s\n", pathbuf);
 	} else {
 		perror("realpath");
 		resp.first_line.status_code = 404;
@@ -151,7 +148,7 @@ HTTPResponse Parser::respond(HTTPRequest req, string doc_root) {
 		return resp;
 	}
 
-	// Verify user has permissions to file, and set file statistics
+	// Verify user has permissions to file, and set properties from file statistics
 	int stat_status = getFileStatistics(res_path);
 	if (stat_status) {
 		resp.first_line.status_code = stat_status;

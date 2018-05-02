@@ -48,3 +48,11 @@ string Framer::topMessage() const {
 void Framer::popMessage() {
 	messages.pop();
 }
+
+void Framer::reset() {
+	std::queue<std::string> empty;
+	std::swap(messages, empty);
+	curr_message = "";
+	delim_check=0;
+	msg_count=0;
+}

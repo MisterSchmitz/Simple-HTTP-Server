@@ -2,6 +2,7 @@
 *.sh
 *.txt
 *.cmake
+*.zip
 
 # Prerequisites
 *.d
