@@ -126,11 +126,12 @@ HTTPResponse Parser::respond(HTTPRequest req, string doc_root) {
 		return resp;
 	}
 
-	string full_path = doc_root.substr(0,doc_root.length()-1)+req.first_line.path;
+//	string full_path = doc_root.substr(0,doc_root.length()-1)+req.first_line.path;
+	string full_path = doc_root+req.first_line.path;
 	const char * req_path = full_path.c_str();
 	printf("Requested path: %s\n", req_path);
 
-	char pathbuf[1024]; /* not sure about the "+ 1" */
+	char pathbuf[1024];
 	char *res_path = realpath(req_path, pathbuf);
 	if (res_path) {
 		printf("This source is at %s.\n", pathbuf);
@@ -149,7 +150,7 @@ HTTPResponse Parser::respond(HTTPRequest req, string doc_root) {
 		return resp;
 	}
 
-	// Verify file exists and user has permissions to file, and set file statistics
+	// Verify user has permissions to file, and set file statistics
 	int stat_status = getFileStatistics(res_path);
 	if (stat_status) {
 		resp.first_line.status_code = stat_status;
