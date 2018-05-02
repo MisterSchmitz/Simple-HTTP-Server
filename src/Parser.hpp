@@ -46,12 +46,14 @@ public:
 class Parser {
     bool canRead;
 	string lastModified;
+	string contentType;
 	long long contentLength;
 
 public:
 	HTTPRequest parse(string request);
 	HTTPResponse respond(HTTPRequest request, string doc_root);
 	void getFileStatistics(const char * file_path);
+    void getContentType(const char * file_path);
 	void clearBuffers();
 };
 

@@ -147,17 +147,10 @@ HTTPResponse Parser::respond(HTTPRequest req, string doc_root) {
 
 	printf("Requested path: %s\n", req_path);
 	getFileStatistics(req_path);
+	getContentType(req_path);
 
-	// Last-Modified (required only if return type is 200)
-	// <day-name>, <day> <month> <year> <hour>:<minute>:<second> GMT
 	resp.header.last_modified = "Last-Modified: "+lastModified+"\r\n";
-
-	// TODO: Content-Type (required if return type is 200; otherwise if you create a custom error page, you can set this to ‘text/html’)
-	// The Content-Type for .jpg files should be “image/jpeg”, for .png files it should be “image/png”, and for html it should be “text/html”
-	resp.header.content_type = "Content-Type: TODO\r\n";
-
-	// TODO: Content-Length (required if return type is 200; otherwise if you create a custom error page, you can set this to the length of that response)
-	// Content-Length header is used to know when the response body is finished and the next response header will begin (for pipelined requests)
+	resp.header.content_type = "Content-Type: "+contentType+"\r\n";
 	resp.header.content_length = "Content-Length: "+to_string(contentLength)+"\r\n";
 
 	return resp;
@@ -177,11 +170,10 @@ void Parser::getFileStatistics(const char * file_path) {
 		printf("Found file.\n");
 	}
 
-	printf("Can read: %i\n", canRead);
+	// File permissions
 	mode_t file_permission = sb.st_mode;
 	canRead = (file_permission & S_IROTH);
-	printf("Mode: %lo (octal)\n",
-		   (unsigned long) sb.st_mode);
+	printf("Can read: %i\n", canRead);
 
 	// Last-Modified: <day-name>, <day> <month> <year> <hour>:<minute>:<second> GMT
 	char datetime[30];
@@ -190,11 +182,25 @@ void Parser::getFileStatistics(const char * file_path) {
 	lastModified = string(datetime);
 
 	// Content-length
-	printf("File size:                %lld bytes\n",
+	printf("File size: %lld bytes\n",
 		   (long long) sb.st_size);
 	contentLength = sb.st_size;
+}
 
+void Parser::getContentType(const char * file_path) {
+	/* The Content-Type for .jpg files should be “image/jpeg”,
+	 * for .png files it should be “image/png”,
+	 * and for html it should be “text/html”
+	 */
+	string s = string(file_path);
+	string delimiter = ".";
+	string fileExtension = s.substr(s.find(delimiter));
 
-//	printf("Blocks allocated:         %lld\n",
-//		   (long long) sb.st_blocks);
+	if (fileExtension == ".jpg" || fileExtension == ".jpeg") {
+		contentType = "image/jpeg";
+	} else if (fileExtension == ".png") {
+		contentType = "image/png";
+	} else if (fileExtension == ".html") {
+		contentType = "text/html";
+	}
 }
