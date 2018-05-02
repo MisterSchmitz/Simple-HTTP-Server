@@ -3,6 +3,8 @@
 #include <string>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <limits.h>
+#include <stdlib.h>
 #include "Parser.hpp"
 
 /*HTTP request and response messages are plain-text, consisting of a 
@@ -124,18 +126,37 @@ HTTPResponse Parser::respond(HTTPRequest req, string doc_root) {
 		return resp;
 	}
 
-	// Get file statistics
 	string full_path = doc_root.substr(0,doc_root.length()-1)+req.first_line.path;
 	const char * req_path = full_path.c_str();
 	printf("Requested path: %s\n", req_path);
 
-	int stat_status = getFileStatistics(req_path);
+	char pathbuf[1024]; /* not sure about the "+ 1" */
+	char *res_path = realpath(req_path, pathbuf);
+	if (res_path) {
+		printf("This source is at %s.\n", pathbuf);
+	} else {
+		perror("realpath");
+		resp.first_line.status_code = 404;
+		resp.setStatusCodeDescription();
+		return resp; // If the file does not exist, a file not found error (error code 404) is returned.
+	}
+
+	// Is realpath inside of root directory
+	int root_idx = string(res_path).find(doc_root, 0);
+	if (root_idx != 0) {
+		resp.first_line.status_code = 404;
+		resp.setStatusCodeDescription();
+		return resp;
+	}
+
+	// Verify file exists and user has permissions to file, and set file statistics
+	int stat_status = getFileStatistics(res_path);
 	if (stat_status) {
 		resp.first_line.status_code = stat_status;
 		resp.setStatusCodeDescription();
 		return resp;
 	}
-	getContentType(req_path);
+	getContentType(res_path);
 
 	resp.header.last_modified = "Last-Modified: "+lastModified+"\r\n";
 	resp.header.content_type = "Content-Type: "+contentType+"\r\n";

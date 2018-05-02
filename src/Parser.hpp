@@ -5,6 +5,8 @@
 #include <stdint.h>
 #include <inttypes.h>
 #include <string>
+#include <limits.h>
+#include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 
