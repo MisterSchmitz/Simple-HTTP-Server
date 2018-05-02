@@ -45,6 +45,9 @@ HTTPRequest Parser::parse(std::string request){
 	// Find path
 	int path_delim_idx = request.find(path_delim, pos);
 	string path = request.substr(pos, path_delim_idx-pos);
+	if (path == "/") {
+		path = "/index.html";
+	}
 	req.first_line.path = path;
 	pos = path_delim_idx+1;
 	
@@ -122,13 +125,10 @@ HTTPResponse Parser::respond(HTTPRequest req, string doc_root) {
 	}
 
 	// Get file statistics
-	const char * req_path;
-//	string test_path = doc_root+"/index.html";
-//	req_path = test_path.c_str();
 	string full_path = doc_root.substr(0,doc_root.length()-1)+req.first_line.path;
-	req_path = full_path.c_str();
-
+	const char * req_path = full_path.c_str();
 	printf("Requested path: %s\n", req_path);
+
 	int stat_status = getFileStatistics(req_path);
 	if (stat_status) {
 		resp.first_line.status_code = stat_status;
