@@ -105,6 +105,7 @@ HTTPRequest Parser::parse(std::string request){
 }
 
 HTTPResponse Parser::respond(HTTPRequest req, string doc_root) {
+	clearBuffers();
 	HTTPResponse resp;
 
 	resp.first_line.HTTPVersion = "";
@@ -159,16 +160,21 @@ HTTPResponse Parser::respond(HTTPRequest req, string doc_root) {
 	}
 	getContentType(res_path);
 
+	contentPath = res_path;
+
 	resp.header.last_modified = "Last-Modified: "+lastModified+"\r\n";
 	resp.header.content_type = "Content-Type: "+contentType+"\r\n";
 	resp.header.content_length = "Content-Length: "+to_string(contentLength)+"\r\n";
-
 
 	return resp;
 }
 
 void Parser::clearBuffers() {
-//    canRead = false;
+	canRead=false;
+	lastModified="";
+	contentType="";
+	contentLength=0;
+	contentPath="";
 }
 
 int Parser::getFileStatistics(const char * file_path) {

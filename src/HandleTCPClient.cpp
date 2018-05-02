@@ -4,12 +4,15 @@
 #include <sys/stat.h>	/* for fstat() */
 #include <unistd.h>     /* for close() */
 #include <iostream>
+#include <fstream>
 #include <assert.h>
 #include "httpd.hpp"
 #include "Framer.hpp"
 #include "Parser.hpp"
 
 using namespace std;
+
+vector<char> ReadAllBytes(char const* filename);
 
 void HandleTCPClient(int clntSocket, string doc_root)
 {
@@ -58,21 +61,37 @@ void HandleTCPClient(int clntSocket, string doc_root)
 			server_response.append(resp.header.content_type);
 			server_response.append(resp.header.content_length);
 			server_response.append("\r\n");
-			
-			// Body
-			// Helper function for generating body
-			if (resp.first_line.status_code == 200) {
-				// Do body stuff
-				cout << doc_root;
+
+			// Send response headers to client
+			int send_header_count = send(clntSocket, server_response.c_str(), server_response.length(), 0);
+			if (send_header_count < 0) {
+				DieWithError("Send header response to client failed.\n");
 			}
-			
-			// Send response to client
-			int send_count = send(clntSocket, server_response.c_str(), server_response.length(), 0);
-			if (send_count < 0) {
-				DieWithError("Send response to client failed.\n");
+
+			// If applicable, send response body to client
+			if (resp.first_line.status_code == 200) {
+
+				vector<char> content = ReadAllBytes(p.contentPath.c_str());
+
+				int send_body_count = send(clntSocket, &content[0], content.size(), 0);
+				if (send_body_count < 0) {
+					DieWithError("Send body response to client failed.\n");
+				}
 			}
 			// If client sent message to close socket, close.
 		}		
 	}
     close(clntSocket);    /* Close client socket */
+}
+
+vector<char> ReadAllBytes(char const* filename) {
+	ifstream ifs(filename, ios::binary|ios::ate);
+	ifstream::pos_type pos = ifs.tellg();
+
+	std::vector<char>  result(pos);
+
+	ifs.seekg(0, ios::beg);
+	ifs.read(&result[0], pos);
+
+	return result;
 }
