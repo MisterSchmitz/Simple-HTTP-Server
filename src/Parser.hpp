@@ -41,6 +41,7 @@ public:
 	HTTPResponseFirstLine_t first_line;
 	HTTPResponseHeader_t header;
 	string body; // TODO: Change type?
+    void setStatusCodeDescription();
 };
 
 class Parser {
@@ -52,9 +53,10 @@ class Parser {
 public:
 	HTTPRequest parse(string request);
 	HTTPResponse respond(HTTPRequest request, string doc_root);
-	void getFileStatistics(const char * file_path);
+	int getFileStatistics(const char * file_path);
     void getContentType(const char * file_path);
 	void clearBuffers();
+    void setStatusCodeDescription(HTTPResponse resp);
 };
 
 #endif // Parser_HPP

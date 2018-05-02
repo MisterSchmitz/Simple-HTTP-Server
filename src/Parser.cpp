@@ -112,29 +112,12 @@ HTTPResponse Parser::respond(HTTPRequest req, string doc_root) {
 	// Status of the request
 	resp.first_line.status_code = req.first_line.status_code;
 
-	// Status code description
-	switch (resp.first_line.status_code) {
-		case 200:
-			resp.first_line.status_code_description = "OK";
-			break;
-		case 400:
-			resp.first_line.status_code_description = "Client Error";
-			break;
-		case 403:
-			resp.first_line.status_code_description = "Forbidden";
-			break;
-		case 404:
-			resp.first_line.status_code_description = "Not Found";
-			break;
-		default:
-			perror("Invalid status code in request.");
-	}
-
 	// Headers
 	// Server name
 	resp.header.server = "Server: mjs\r\n";
 
 	if (resp.first_line.status_code != 200) {
+		resp.setStatusCodeDescription();
 		return resp;
 	}
 
@@ -146,12 +129,18 @@ HTTPResponse Parser::respond(HTTPRequest req, string doc_root) {
 	req_path = full_path.c_str();
 
 	printf("Requested path: %s\n", req_path);
-	getFileStatistics(req_path);
+	int stat_status = getFileStatistics(req_path);
+	if (stat_status) {
+		resp.first_line.status_code = stat_status;
+		resp.setStatusCodeDescription();
+		return resp;
+	}
 	getContentType(req_path);
 
 	resp.header.last_modified = "Last-Modified: "+lastModified+"\r\n";
 	resp.header.content_type = "Content-Type: "+contentType+"\r\n";
 	resp.header.content_length = "Content-Length: "+to_string(contentLength)+"\r\n";
+
 
 	return resp;
 }
@@ -160,20 +149,20 @@ void Parser::clearBuffers() {
 //    canRead = false;
 }
 
-void Parser::getFileStatistics(const char * file_path) {
+int Parser::getFileStatistics(const char * file_path) {
 	struct stat sb;
-
 	if (stat(file_path, &sb) == -1) {
 		perror("stat");
-		exit(EXIT_FAILURE);
-	} else {
-		printf("Found file.\n");
+		return 404; // If the file does not exist, a file not found error (error code 404) is returned.
 	}
 
-	// File permissions
+	// Verify read permissions
 	mode_t file_permission = sb.st_mode;
 	canRead = (file_permission & S_IROTH);
 	printf("Can read: %i\n", canRead);
+	if (!canRead) {
+		return 403; // If a file is present but proper permissions are not set, a permission denied error is returned.
+	}
 
 	// Last-Modified: <day-name>, <day> <month> <year> <hour>:<minute>:<second> GMT
 	char datetime[30];
@@ -185,13 +174,15 @@ void Parser::getFileStatistics(const char * file_path) {
 	printf("File size: %lld bytes\n",
 		   (long long) sb.st_size);
 	contentLength = sb.st_size;
+
+	return 0;
 }
 
+/* The Content-Type for .jpg files should be “image/jpeg”,
+ * for .png files it should be “image/png”,
+ * and for html it should be “text/html”
+ */
 void Parser::getContentType(const char * file_path) {
-	/* The Content-Type for .jpg files should be “image/jpeg”,
-	 * for .png files it should be “image/png”,
-	 * and for html it should be “text/html”
-	 */
 	string s = string(file_path);
 	string delimiter = ".";
 	string fileExtension = s.substr(s.find(delimiter));
@@ -202,5 +193,25 @@ void Parser::getContentType(const char * file_path) {
 		contentType = "image/png";
 	} else if (fileExtension == ".html") {
 		contentType = "text/html";
+	}
+}
+
+void HTTPResponse::setStatusCodeDescription() {
+	// Status code description
+	switch (first_line.status_code) {
+		case 200:
+			first_line.status_code_description = "OK";
+			break;
+		case 400:
+			first_line.status_code_description = "Client Error";
+			break;
+		case 403:
+			first_line.status_code_description = "Forbidden";
+			break;
+		case 404:
+			first_line.status_code_description = "Not Found";
+			break;
+		default:
+			perror("Invalid status code in request.");
 	}
 }
