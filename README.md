@@ -1,9 +1,13 @@
-# cse291-project1
+## Simple HTTP Server
+Began life as an assignment for my Networked Systems class. Web server that listens for HTTP requests, processes the requests, and sends HTTP responses.
 
-Basic skeleton code for CSE 291's Project 1
+## How it's built
+Mainly C++, making use of core Sockets functionality.
 
-Starter code copyright (c) 2017, 2018 George Porter.  All Rights Reserved.
+## What I learned
+Basic networking fundamentals.
+How to work with Sockets in C++.
+How to frame and parse HTTP messages.
 
-## To build
-
-make
+## What's next for the project
+Implement additional types of HTTP requests (i.e. PUT). Currently only GET requests are supported.
